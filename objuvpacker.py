@@ -87,7 +87,7 @@ def main():
         if line.startswith("newmtl"):
             name = line[7:]
             print("\tsaw material name", name)
-            if name != "None":
+            if name and name != "None":
                 if len(dmaps) != len(names):
                     print("\tlast material did not have a diffuse, ignoring")
                     names.pop()
@@ -101,7 +101,9 @@ def main():
                 # dmap = guess_realpath(line[7:])
                 dmap = guess_realpath(m)
                 if not dmap:
-                    raise ValueError("missing a required texture file " + line)
+                    # raise ValueError("missing a required texture file " + line)
+                    print("\tmissing a required texture file " + line)
+
 
                 # if dmap not in dmaps:
                 dmaps.append(dmap)
@@ -167,6 +169,7 @@ def main():
 
         uv_lines = []
         curr_mtl = None
+        used_mtl = set()
 
         for line_idx, line in enumerate(obj_lines):
             if line.startswith("vt"):
@@ -174,6 +177,7 @@ def main():
             elif line.startswith("usemtl"):
                 mtl_name = line[7:]
                 curr_mtl = mtl_name
+                # print("changed to", curr_mtl)
             elif line.startswith("f"): # face definitions
                 for vertex in line[2:].split(): # individual vertex definitions
                     v_def = vertex.split(sep="/")
@@ -184,13 +188,16 @@ def main():
                         uv = [float(uv.strip()) for uv in uv_line.split()]
 
                         if curr_mtl and curr_mtl in texmap:
-                            # pprint(uv)
+                            used_mtl.add(mtl_name)
                             textents[texmap[curr_mtl]].add(uv[0], uv[1])
+                        else:
+                            print(curr_mtl, "not in texmap")
                             # print(curr_mtl, textents)
                         # get uv values at uv_idx
                         # alter them in the original file
 
         # pprint(textents)
+        # pprint(used_mtl)
 
         if args.wrap:
             # loop through UV AABB's, warning when out of range and prompting

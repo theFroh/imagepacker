@@ -145,6 +145,7 @@ def crop_by_extents(image, extent, wrap=False):
     w,h = image.size
     coords = [math.floor(extent.min_x*w), math.floor(extent.min_y*h),
               math.ceil(extent.max_x*w), math.ceil(extent.max_y*h)]
+    print("\nEXTENT")
     pprint(extent)
 
     if min(extent.min_x,extent.min_y) < 0 or max(extent.max_x,extent.max_y) > 1:
@@ -160,18 +161,27 @@ def crop_by_extents(image, extent, wrap=False):
         new_w, new_h = new_im.size
 
         # Iterate through a grid, to place the background tile
-        for i in range(coords[0], new_w, w):
-            for j in range(coords[1], new_h, h):
+        for i in range(0, new_w, w):
+            for j in range(0, new_h, h):
                 #paste the image at location i, j:
                 new_im.paste(image, (i, j))
 
-        coords[0] = coords[0]
-        coords[1] = coords[1]
+        crop_coords = coords.copy()
 
-        coords[2] = coords[2]
-        coords[3] = coords[3]
+        if crop_coords[0] < 0:
+            crop_coords[2] = crop_coords[2] - crop_coords[0]
+            crop_coords[0] = 0
+        if crop_coords[1] < 0:
+            crop_coords[3] = crop_coords[3] - crop_coords[1]
+            crop_coords[1] = 0
 
-        image = new_im.crop(coords)
+        # crop_coords[0] = crop_coords[0]
+        # crop_coords[1] = crop_coords[1]
+
+        # crop_coords[2] = crop_coords[2]
+        # crop_coords[3] = crop_coords[3]
+
+        image = new_im.crop(crop_coords)
 
     else:
         coords[0] = max(coords[0], 0)
@@ -228,7 +238,7 @@ def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, w
     packer = BlockPacker()
     packer.fit(blocks)
 
-    output_image = Image.new("RGB", (packer.root.w, packer.root.h))
+    output_image = Image.new("RGBA", (packer.root.w, packer.root.h))
 
     uv_changes = {}
     for block in blocks:
