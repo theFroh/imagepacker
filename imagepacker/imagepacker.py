@@ -138,32 +138,30 @@ class BlockPacker():
             return None
 
 
-def crop_by_extents(image, extent, wrap=False):
+def crop_by_extents(image, extent, wrap=False, crop=False):
     image = image.convert("RGBA")
     # overlay = Image.new('RGBA', image.size, (255,255,255,0))
 
     w,h = image.size
     coords = [math.floor(extent.min_x*w), math.floor(extent.min_y*h),
               math.ceil(extent.max_x*w), math.ceil(extent.max_y*h)]
-    print("\nEXTENT")
-    pprint(extent)
+    # # print("\nEXTENT")
+    # pprint(extent)
 
     if min(extent.min_x,extent.min_y) < 0 or max(extent.max_x,extent.max_y) > 1:
         print("WARNING! UV Coordinates lying outside of [0:1] space!")
 
-    pprint(coords)
+    # pprint(coords)
 
     if extent.to_wrap:
         h_w, v_w = extent.wrapping()
-        print("Ye", h_w, v_w)
 
         new_im = Image.new("RGBA", (math.ceil(h_w*w), math.ceil(v_w*h)))
         new_w, new_h = new_im.size
 
-        # Iterate through a grid, to place the background tile
+        # Iterate through a grid, to place the image to tile it
         for i in range(0, new_w, w):
             for j in range(0, new_h, h):
-                #paste the image at location i, j:
                 new_im.paste(image, (i, j))
 
         crop_coords = coords.copy()
@@ -175,14 +173,7 @@ def crop_by_extents(image, extent, wrap=False):
             crop_coords[3] = crop_coords[3] - crop_coords[1]
             crop_coords[1] = 0
 
-        # crop_coords[0] = crop_coords[0]
-        # crop_coords[1] = crop_coords[1]
-
-        # crop_coords[2] = crop_coords[2]
-        # crop_coords[3] = crop_coords[3]
-
         image = new_im.crop(crop_coords)
-
     else:
         coords[0] = max(coords[0], 0)
         coords[1] = max(coords[1], 0)
@@ -197,18 +188,11 @@ def crop_by_extents(image, extent, wrap=False):
 
     # offset from origin x, y, horizontal scale, vertical scale
     changes = (coords[0], coords[1], changed_w/w, changed_h/h)
-    pprint(changes)
+    # pprint(changes)
 
     return (image, changes)
 
-    # pprint(coords)
-
-    # d = ImageDraw.Draw(overlay)
-    # d.rectangle(coords, fill=(255,0,0,50))
-
-    # return Image.alpha_composite(image, overlay)
-
-def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, wrap=False):
+def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, wrap=False, crop=False):
     images = []
     blocks = []
     image_name_map = {}
@@ -223,7 +207,7 @@ def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, w
         changes = None
         if extents:
             print(filename, image.size)
-            image, changes = crop_by_extents(image, extents[filename], wrap=wrap)
+            image, changes = crop_by_extents(image, extents[filename], wrap, crop)
 
         images.append(image)
         image_name_map[filename] = image
@@ -248,45 +232,18 @@ def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, w
         uv_changes[fname] = {
             "offset": (
                 # should be in [0, 1] range
-                (block.x - changes[0])/output_image.size[0],
+                (block.x - (changes[0] if changes else 0))/output_image.size[0],
                 # UV origin is bottom left, PIL assumes top left!
-                # 1 - (block.y + image.size[1])/output_image.size[1]
-                (block.y - changes[1])/output_image.size[1]
+                (block.y - (changes[1] if changes else 0))/output_image.size[1]
             ),
 
             "aspect": (
-                (1/changes[2])* (image.size[0]/output_image.size[0]),
-                (1/changes[3])* (image.size[1]/output_image.size[1])
+                ((1/changes[2]) if changes else 1) * (image.size[0]/output_image.size[0]),
+                ((1/changes[3]) if changes else 1) * (image.size[1]/output_image.size[1])
             ),
-
-
-            # "global": {
-            #     "aspect": (
-            #         (image.size[0]/output_image.size[0]),
-            #         (image.size[1]/output_image.size[1])
-            #     ),
-
-            #     "offset": (
-            #         # should be in [0, 1] range
-            #         (block.x/output_image.size[0],
-            #         # UV origin is bottom left, PIL assumes top left!
-            #         # 1 - (block.y + image.size[1])/output_image.size[1]
-            #         (block.x - changes[1])/output_image.size[1]
-            #     )
-            # }
         }
 
         output_image.paste(image, (block.x, block.y))
 
     output_image = output_image.transpose(Image.FLIP_TOP_BOTTOM)
     return output_image, uv_changes
-
-if __name__ == '__main__':
-    import glob
-    from pprint import pprint
-    filenames = glob.glob("E:\Applications\BTSync\Home Share\Programming\SimpleModelPacker\*.tga")
-    print(filenames)
-    if len(filenames) > 0:
-        img,uv = pack_images(filenames)
-        img.show()
-        pprint(uv)

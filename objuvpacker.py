@@ -7,7 +7,7 @@ from distutils.util import strtobool
 from imagepacker import pack_images
 
 def guess_realpath(path):
-    """Tries to rectify user or other errors in a filepath"""
+    """Checks for a file in a path, or in a local path"""
     basename = os.path.basename(path)
 
     # first test the path
@@ -47,7 +47,7 @@ def main():
     obj_name = os.path.splitext(os.path.basename(args.obj))[0]
 
     if not args.output: # default to a reasonable name
-        output_name = obj_name + "_p"
+        output_name = obj_name + "_packed"
 
     # we read the entire obj both to check for mtl now, and for processing later
     obj_lines = []
@@ -117,12 +117,6 @@ def main():
             print("\tignoring transparency value")
             continue
 
-        # elif line.startswith("map_"):
-            # print("\tignoring other map", line)
-            # continue
-            # amap = guess_realpath(line[7:])
-            # print("\tsaw ambient map", amap)
-            # line = "map_Ka " + outname
         new_mtl_lines.append(line)
 
     if len(dmaps) != len(names):
@@ -151,6 +145,9 @@ def main():
                 self.min_y = min(self.min_y, y) if self.min_y else y
                 self.max_x = max(self.max_x, x) if self.max_x else x
                 self.max_y = max(self.max_y, y) if self.max_y else y
+
+            def uv_wrap(self):
+                return (self.max_x - self.min_x, self.max_y - self.min_y)
 
             def wrapping(self):
                 if self.min_x < 0 or self.min_y < 0 or self.max_x > 1 or self.max_y > 1:
@@ -207,18 +204,19 @@ def main():
                 print(name, extent)
                 if extent.wrapping():
                     h_w, v_w = extent.wrapping()
-                    print("\nWARNING: The following texture has coordinates that imply it wraps {}x{} times:\n\t{}".format(round(h_w, 1), round(v_w, 1), name))
-                    to_wrap = False
-                    try:
-                        to_wrap = strtobool(input("Do you want to unroll this wrapping? [y/N]: "))
-                    except ValueError as ve:
-                        pass
-                    extent.to_wrap = to_wrap
+                    if h_w >= 2 or v_w >= 2:
+                        print("\nWARNING: The following texture has coordinates that imply it wraps {}x{} times:\n\t{}".format(round(h_w, 1), round(v_w, 1), name))
+                        to_wrap = False
+                        try:
+                            to_wrap = strtobool(input("Do you want to unroll this wrapping? [y/N]: "))
+                        except ValueError as ve:
+                            pass
+                        extent.to_wrap = to_wrap
 
-                    if to_wrap:
-                        print("Marking texture to be wrapped.")
-                    else:
-                        print("Ignoring texture wrapping.")
+                        if to_wrap:
+                            print("Marking texture to be wrapped.")
+                        else:
+                            print("Ignoring texture wrapping.")
 
     else:
         textents = None
@@ -290,7 +288,7 @@ def main():
 
 if __name__ == '__main__':
     import traceback
-    import os
+    # import os
     # try:
     main()
     # except Exception as ex:
