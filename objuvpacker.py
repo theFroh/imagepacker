@@ -26,9 +26,8 @@ def main():
     parser.add_argument("-o","--output", nargs=1, help="output name, used for image and folder")
     parser.add_argument("-a","--add", nargs="+", help="any additional images to pack")
 
-    # parser.add_argument('--crop', dest='crop', action='store_true')
     parser.add_argument('--no-crop', dest='crop', action='store_false', help="do not attempt to crop textures to just what is used")
-    parser.add_argument('--no-wrap', dest='wrap', action='store_false', help="do not attempt to wrap textures outside of UV space")
+    parser.add_argument('--no-wrap', dest='wrap', action='store_false', help="do not attempt to wrap textures outside of UV space (must be cropping)")
 
     parser.set_defaults(crop=True)
 
@@ -103,7 +102,6 @@ def main():
                 if not dmap:
                     # raise ValueError("missing a required texture file " + line)
                     print("\tmissing a required texture file " + line)
-
 
                 # if dmap not in dmaps:
                 dmaps.append(dmap)
@@ -201,7 +199,7 @@ def main():
             # to see if the user wishes to un-wrap the texture
 
             for name, extent in textents.items():
-                print(name, extent)
+                # print(name, extent)
                 if extent.wrapping():
                     h_w, v_w = extent.wrapping()
                     if h_w >= 2 or v_w >= 2:
@@ -283,6 +281,8 @@ def main():
     with open(output_name+".mtl", "w") as new_mtl:
         new_mtl.write("\n".join(new_mtl_lines))
     output_image.save(outname, format="PNG")
+
+    print("\nRemember to convert the final packed texture into a JPEG if you do not need the transparency.")
 
     output_image.show()
 

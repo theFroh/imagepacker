@@ -145,13 +145,13 @@ def crop_by_extents(image, extent, wrap=False, crop=False):
     w,h = image.size
     coords = [math.floor(extent.min_x*w), math.floor(extent.min_y*h),
               math.ceil(extent.max_x*w), math.ceil(extent.max_y*h)]
-    # # print("\nEXTENT")
-    # pprint(extent)
+    print("\nEXTENT")
+    pprint(extent)
 
     if min(extent.min_x,extent.min_y) < 0 or max(extent.max_x,extent.max_y) > 1:
         print("WARNING! UV Coordinates lying outside of [0:1] space!")
 
-    # pprint(coords)
+    pprint(coords)
 
     if extent.to_wrap:
         h_w, v_w = extent.wrapping()
@@ -197,7 +197,7 @@ def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, w
     blocks = []
     image_name_map = {}
 
-    image_paths.sort() # sort so we get repeatable file ordering
+    image_paths.sort() # sort so we get repeatable file ordering, I hope!
 
     for filename in image_paths:
         print("opening", filename)
@@ -206,7 +206,7 @@ def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, w
         # rescale images
         changes = None
         if extents:
-            print(filename, image.size)
+            # print(filename, image.size)
             image, changes = crop_by_extents(image, extents[filename], wrap, crop)
 
         images.append(image)
