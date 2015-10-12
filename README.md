@@ -37,6 +37,14 @@ Drag and drop an `.obj` file onto `objuvpacker.py` and behold the results inside
 4. Inspect the packed output `.obj` and texture inside of the output directory (a folder named after the original `.obj` with `_packed` appended to it) to see if everything went well.
 5. If you're doing this for Tabletop Simulator, convert the packed texture into a more compressed form (`.jpg`) if you do not need the transparency *(you usually don't)*, and then upload the `.obj` and texture file for use ingame -- have fun!
 
+#### Arguments
+
+- *Material* `-m --material MATERIAL` - Explicitly tell the script what `.mtl` file to use.
+- *Output* `-o --output OUTPUT` - Explicitly tell the script where output to.
+- *Add* `-a --add [ADD, ...]` - Additional images to be packed. (Probably useless)
+- *No crop* `--no-crop` - Disable any cropping or tiling/unrolling.
+- *No tile* `--no-tile` - Ignore any wrapped/tiling of textures (depends on cropping).
+
 #### Tiling or wrapping warnings
 If you get a prompt such as:
 
