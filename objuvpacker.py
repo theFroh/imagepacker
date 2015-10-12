@@ -11,10 +11,10 @@ def guess_realpath(path):
     basename = os.path.basename(path)
 
     # first test the path
-    if os.path.isfile(path): # good, it exists
-        return os.path.realpath(path)
-    elif os.path.isfile(basename): # try locally
+    if os.path.isfile(basename): # try locally
         return os.path.realpath(basename)
+    elif os.path.isfile(path): # good, it exists
+        return os.path.realpath(path)
     else:
         return None # uh oh
     pass
@@ -85,14 +85,14 @@ def main():
     for line in mtl_lines:
         if line.startswith("newmtl"):
             name = line[7:]
-            print("\tsaw material name", name)
+            # print("\tsaw material name", name)
             if name and name != "None":
                 if len(dmaps) != len(names):
-                    print("\tlast material did not have a diffuse, ignoring")
+                    # print("\tlast material did not have a diffuse, ignoring")
                     names.pop()
                 names.append(name)
             else:
-                print("\tignoring 'None' material")
+                # print("\tignoring 'None' material")
                 continue
         elif line.startswith("map_"):
             mtype,m = line.split(" ", 1)
@@ -105,20 +105,20 @@ def main():
 
                 # if dmap not in dmaps:
                 dmaps.append(dmap)
-                print("\tsaw texture map", dmap)
+                # print("\tsaw texture map", dmap)
                 line = " ".join([mtype, outname])
                 # line = "map_Kd " + outname
             else:
-                print("\tignoring non-diffuse texture map", mtype)
+                # print("\tignoring non-diffuse texture map", mtype)
                 continue
         elif line.startswith("d "):
-            print("\tignoring transparency value")
+            # print("\tignoring transparency value")
             continue
 
         new_mtl_lines.append(line)
 
     if len(dmaps) != len(names):
-        print("\tlast material did not have a diffuse, ignoring")
+        # print("\tlast material did not have a diffuse, ignoring")
         names.pop()
 
     # process out a map of diffuse texture file paths
@@ -206,6 +206,7 @@ def main():
                         print("\nWARNING: The following texture has coordinates that imply it tiles {}x{} times:\n\t{}".format(round(h_w, 1), round(v_w, 1), name))
                         print("This may be intentional (i.e. tank track textures), or a sign of problematic UV coordinates.")
                         print("Consider only unwrapping/tiling this if you know that it is intentional.")
+                        print("(If you are unsure, just hit enter to answer 'No')")
                         to_tile = False
                         try:
                             to_tile = strtobool(input("Do you want to unroll this wrapping by tiling the texture? [y/N]: "))

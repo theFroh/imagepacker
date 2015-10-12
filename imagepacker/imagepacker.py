@@ -149,7 +149,7 @@ def crop_by_extents(image, extent, tile=False, crop=False):
     # pprint(extent)
 
     if min(extent.min_x,extent.min_y) < 0 or max(extent.max_x,extent.max_y) > 1:
-        print("WARNING! UV Coordinates lying outside of [0:1] space!")
+        print("\tWARNING! UV Coordinates lying outside of [0:1] space!")
 
     # pprint(coords)
 
