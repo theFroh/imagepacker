@@ -138,23 +138,23 @@ class BlockPacker():
             return None
 
 
-def crop_by_extents(image, extent, wrap=False, crop=False):
+def crop_by_extents(image, extent, tile=False, crop=False):
     image = image.convert("RGBA")
     # overlay = Image.new('RGBA', image.size, (255,255,255,0))
 
     w,h = image.size
     coords = [math.floor(extent.min_x*w), math.floor(extent.min_y*h),
               math.ceil(extent.max_x*w), math.ceil(extent.max_y*h)]
-    print("\nEXTENT")
-    pprint(extent)
+    # print("\nEXTENT")
+    # pprint(extent)
 
     if min(extent.min_x,extent.min_y) < 0 or max(extent.max_x,extent.max_y) > 1:
         print("WARNING! UV Coordinates lying outside of [0:1] space!")
 
-    pprint(coords)
+    # pprint(coords)
 
-    if extent.to_wrap:
-        h_w, v_w = extent.wrapping()
+    if extent.to_tile:
+        h_w, v_w = extent.tiling()
 
         new_im = Image.new("RGBA", (max(w,math.ceil(h_w*w)), max(h,math.ceil(v_w*h))))
         new_w, new_h = new_im.size
@@ -173,10 +173,7 @@ def crop_by_extents(image, extent, wrap=False, crop=False):
             crop_coords[3] = crop_coords[3] - crop_coords[1]
             crop_coords[1] = 0
 
-        image.show()
-        new_im.show()
-
-        pprint(crop_coords)
+        # pprint(crop_coords)
         image = new_im.crop(crop_coords)
     else:
         coords[0] = max(coords[0], 0)
@@ -191,12 +188,13 @@ def crop_by_extents(image, extent, wrap=False, crop=False):
     changed_h = coords[3] - coords[1]
 
     # offset from origin x, y, horizontal scale, vertical scale
+    # TODO: use an actual data structure to store this, not a bloody tuple
     changes = (coords[0], coords[1], changed_w/w, changed_h/h)
     # pprint(changes)
 
     return (image, changes)
 
-def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, wrap=False, crop=False):
+def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, tile=False, crop=False):
     images = []
     blocks = []
     image_name_map = {}
@@ -211,7 +209,7 @@ def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, w
         changes = None
         if extents:
             # print(filename, image.size)
-            image, changes = crop_by_extents(image, extents[filename], wrap, crop)
+            image, changes = crop_by_extents(image, extents[filename], tile, crop)
 
         images.append(image)
         image_name_map[filename] = image

@@ -27,7 +27,7 @@ def main():
     parser.add_argument("-a","--add", nargs="+", help="any additional images to pack")
 
     parser.add_argument('--no-crop', dest='crop', action='store_false', help="do not attempt to crop textures to just what is used")
-    parser.add_argument('--no-wrap', dest='wrap', action='store_false', help="do not attempt to wrap textures outside of UV space (must be cropping)")
+    parser.add_argument('--no-tile', dest='tile', action='store_false', help="do not attempt to tile textures outside of UV space (must be cropping)")
 
     parser.set_defaults(crop=True)
 
@@ -136,7 +136,7 @@ def main():
                 self.max_x = max_x
                 self.max_y = max_y
 
-                self.to_wrap = False
+                self.to_tile = False
 
             def add(self, x,y):
                 self.min_x = min(self.min_x, x) if self.min_x else x
@@ -147,7 +147,7 @@ def main():
             def uv_wrap(self):
                 return (self.max_x - self.min_x, self.max_y - self.min_y)
 
-            def wrapping(self):
+            def tiling(self):
                 if self.min_x < 0 or self.min_y < 0 or self.max_x > 1 or self.max_y > 1:
                     return (self.max_x - self.min_x, self.max_y - self.min_y)
                 return None
@@ -194,27 +194,29 @@ def main():
         # pprint(textents)
         # pprint(used_mtl)
 
-        if args.wrap:
+        if args.tile:
             # loop through UV AABB's, warning when out of range and prompting
-            # to see if the user wishes to un-wrap the texture
+            # to see if the user wishes to tile the texture
 
             for name, extent in textents.items():
                 # print(name, extent)
-                if extent.wrapping():
-                    h_w, v_w = extent.wrapping()
+                if extent.tiling():
+                    h_w, v_w = extent.tiling()
                     if h_w >= 2 or v_w >= 2:
-                        print("\nWARNING: The following texture has coordinates that imply it wraps {}x{} times:\n\t{}".format(round(h_w, 1), round(v_w, 1), name))
-                        to_wrap = False
+                        print("\nWARNING: The following texture has coordinates that imply it tiles {}x{} times:\n\t{}".format(round(h_w, 1), round(v_w, 1), name))
+                        print("This may be intentional (i.e. tank track textures), or a sign of problematic UV coordinates.")
+                        print("Consider only unwrapping/tiling this if you know that it is intentional.")
+                        to_tile = False
                         try:
-                            to_wrap = strtobool(input("Do you want to unroll this wrapping? [y/N]: "))
+                            to_tile = strtobool(input("Do you want to unroll this wrapping by tiling the texture? [y/N]: "))
                         except ValueError as ve:
                             pass
-                        extent.to_wrap = to_wrap
+                        extent.to_tile = to_tile
 
-                        if to_wrap:
-                            print("Marking texture to be wrapped.")
+                        if to_tile:
+                            print("Marking texture to be tiled.")
                         else:
-                            print("Ignoring texture wrapping.")
+                            print("Ignoring texture tiled.")
 
     else:
         textents = None
@@ -284,7 +286,7 @@ def main():
 
     print("\nRemember to convert the final packed texture into a JPEG if you do not need the transparency.")
 
-    output_image.show()
+    # output_image.show()
 
 if __name__ == '__main__':
     import traceback
