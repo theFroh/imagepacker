@@ -45,8 +45,11 @@ Drag and drop an `.obj` file onto `objuvpacker.py` and behold the results inside
 - *No crop* `--no-crop` - Disable any cropping or tiling/unrolling.
 - *No tile* `--no-tile` - Ignore any wrapped/tiling of textures (depends on cropping).
 
+#### Troubleshooting
+If you're having trouble packing a model, you can try running the script in a terminal with `--no-crop` and `--no-wrap`. This will use the simplest possible packing, but should be fairly solid.
+
 #### Tiling or wrapping warnings
-If you get a prompt such as:
+You may see a prompt similar to:
 
     WARNING: The following texture has coordinates that imply it tiles 0.8x10.7 times:
         E:\Syncthing\code\obj texture packer\sample\raider\predator_track_l.tga
