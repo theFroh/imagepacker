@@ -156,7 +156,7 @@ def crop_by_extents(image, extent, wrap=False, crop=False):
     if extent.to_wrap:
         h_w, v_w = extent.wrapping()
 
-        new_im = Image.new("RGBA", (math.ceil(h_w*w), math.ceil(v_w*h)))
+        new_im = Image.new("RGBA", (max(w,math.ceil(h_w*w)), max(h,math.ceil(v_w*h))))
         new_w, new_h = new_im.size
 
         # Iterate through a grid, to place the image to tile it
@@ -173,6 +173,10 @@ def crop_by_extents(image, extent, wrap=False, crop=False):
             crop_coords[3] = crop_coords[3] - crop_coords[1]
             crop_coords[1] = 0
 
+        image.show()
+        new_im.show()
+
+        pprint(crop_coords)
         image = new_im.crop(crop_coords)
     else:
         coords[0] = max(coords[0], 0)
