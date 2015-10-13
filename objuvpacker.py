@@ -171,8 +171,9 @@ def main():
                 return (self.max_x - self.min_x, self.max_y - self.min_y)
 
             def tiling(self):
-                if self.min_x < 0 or self.min_y < 0 or self.max_x > 1 or self.max_y > 1:
-                    return (self.max_x - self.min_x, self.max_y - self.min_y)
+                if self.min_x and self.max_x and self.min_y and self.max_y:
+                    if self.min_x < 0 or self.min_y < 0 or self.max_x > 1 or self.max_y > 1:
+                        return (self.max_x - self.min_x, self.max_y - self.min_y)
                 return None
 
             def __repr__(self):
@@ -244,7 +245,7 @@ def main():
 
     else:
         textents = None
-
+    # pprint(dmaps)
     # pack and save textures, get info about new coordinate changes
     print("\ncreating packed texture")
     if additional: # additional images

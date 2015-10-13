@@ -222,15 +222,18 @@ def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, t
     blocks = []
     image_name_map = {}
 
+    image_paths = [path for path in image_paths if path is not None]
     image_paths.sort() # sort so we get repeatable file ordering, I hope!
+    # pprint(image_paths)
 
     for filename in image_paths:
         print("opening", filename)
         image = Image.open(filename)
+
         image = image.transpose(Image.FLIP_TOP_BOTTOM)
         # rescale images
         changes = None
-        if extents:
+        if extents and extents[filename]:
             # print(filename, image.size)
             image, changes = crop_by_extents(image, extents[filename], tile, crop)
 
