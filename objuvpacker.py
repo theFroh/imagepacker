@@ -51,6 +51,7 @@ def main():
 
     parser.add_argument('--no-crop', dest='crop', action='store_false', help="do not attempt to crop textures to just what is used")
     parser.add_argument('--no-tile', dest='tile', action='store_false', help="do not attempt to tile textures outside of UV space (must be cropping)")
+    parser.add_argument('--no-wrap', dest='wrap', action='store_false', help="don't shift remaining UV verts into [0,1] space")
 
     parser.set_defaults(crop=True)
 
@@ -162,10 +163,10 @@ def main():
                 self.to_tile = False
 
             def add(self, x,y):
-                self.min_x = min(self.min_x, x) if self.min_x else x
-                self.min_y = min(self.min_y, y) if self.min_y else y
-                self.max_x = max(self.max_x, x) if self.max_x else x
-                self.max_y = max(self.max_y, y) if self.max_y else y
+                self.min_x = min(self.min_x, x) if self.min_x is not None else x
+                self.min_y = min(self.min_y, y) if self.min_y is not None else y
+                self.max_x = max(self.max_x, x) if self.max_x is not None else x
+                self.max_y = max(self.max_y, y) if self.max_y is not None else y
 
             def uv_wrap(self):
                 return (self.max_x - self.min_x, self.max_y - self.min_y)
@@ -211,7 +212,6 @@ def main():
                             textents[texmap[curr_mtl]].add(uv[0], uv[1])
                         else:
                             print(curr_mtl, "not in texmap")
-                            # print(curr_mtl, textents)
                         # get uv values at uv_idx
                         # alter them in the original file
 
@@ -223,10 +223,10 @@ def main():
             # to see if the user wishes to tile the texture
 
             for name, extent in textents.items():
-                # print(name, extent)
+                print(name, extent)
                 if extent.tiling():
                     h_w, v_w = extent.tiling()
-                    if h_w >= 2 or v_w >= 2:
+                    if h_w > 1 or v_w > 1:
                         print("\nWARNING: The following texture has coordinates that imply it tiles {}x{} times:\n\t{}".format(round(h_w, 1), round(v_w, 1), name))
                         print("This may be intentional (i.e. tank track textures), or a sign of problematic UV coordinates.")
                         print("Consider only unwrapping/tiling this if you know that it is intentional.")
@@ -279,10 +279,14 @@ def main():
 
                     if curr_mtl and curr_mtl in texmap:
                         changes = uv_changes[texmap[curr_mtl]]
+                        uv[0] = uv[0] * changes["aspect"][0] + changes["offset"][0]
+                        uv[1] = uv[1] * changes["aspect"][1] + changes["offset"][1]
+
 
                         new_obj_lines[uv_line_idx] = "vt {0} {1}".format(
-                            (uv[0] * changes["aspect"][0] + changes["offset"][0]),
-                            (uv[1] * changes["aspect"][1] + changes["offset"][1])
+                            uv[0], uv[1]
+                            # (uv[0] * changes["aspect"][0] + changes["offset"][0]),
+                            # (uv[1] * changes["aspect"][1] + changes["offset"][1])
                         )
 
                     # get uv values at uv_idx

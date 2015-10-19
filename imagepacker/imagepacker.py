@@ -229,18 +229,20 @@ def pack_images(image_paths, background=(0,0,0,0), format="PNG", extents=None, t
     for filename in image_paths:
         print("opening", filename)
         image = Image.open(filename)
+        # print(image.size)
 
         image = image.transpose(Image.FLIP_TOP_BOTTOM)
         # rescale images
         changes = None
         if extents and extents[filename]:
-            # print(filename, image.size)
+            # print(filename, extents)
             image, changes = crop_by_extents(image, extents[filename], tile, crop)
 
         images.append(image)
         image_name_map[filename] = image
 
         w,h = image.size
+        # print(w,h, filename)
         # using filename so we can pass back UV info without storing it in image
         blocks.append(Block(w,h, data=(filename, changes)))
 
