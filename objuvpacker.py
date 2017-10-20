@@ -69,7 +69,9 @@ def main():
     obj_local_path = os.path.basename(args.obj)
     obj_name = os.path.splitext(os.path.basename(args.obj))[0]
 
-    if not args.output: # default to a reasonable name
+    if args.output:
+        output_name = args.output
+    else: # default to a reasonable name
         output_name = obj_name + "_packed"
 
     # we read the entire obj both to check for mtl now, and for processing later
