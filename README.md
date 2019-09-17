@@ -1,5 +1,5 @@
 # Image Packer
-Takes a Wavefront OBJ with textures and attempts to squash them into a single texture file.
+Takes a Wavefront OBJ with many textures and squishes them into a single texture file.
 
 ## Why?
 I put this together for the purpose of packing complex models with multiple textures (practically any non-trivial model) into a single `.obj` and texture file for use as custom models in [Tabletop Simulator](http://berserk-games.com/tabletop-simulator/).
