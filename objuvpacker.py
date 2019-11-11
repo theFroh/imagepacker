@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import argparse
+from gooey import Gooey, GooeyParser
 import os
 import sys
 from pprint import pprint
@@ -42,12 +42,13 @@ def guess_realpath(path):
         return None # uh oh
     pass
 
+@Gooey
 def main():
-    parser = argparse.ArgumentParser(description="Naively pokes obj+mtls")
-    parser.add_argument("obj", help="path to the .obj file")
-    parser.add_argument("-m", "--material", nargs=1, help="path to the .mtl file")
+    parser = GooeyParser(description="Naively pokes obj+mtls")
+    parser.add_argument("obj", help="path to the .obj file", widget="FileChooser")
+    parser.add_argument("-m", "--material", nargs=1, help="path to the .mtl file", widget="FileChooser")
     parser.add_argument("-o","--output", nargs=1, help="output name, used for image and folder")
-    parser.add_argument("-a","--add", nargs="+", help="any additional images to pack")
+    parser.add_argument("-a","--add", nargs="+", help="any additional images to pack", widget="MultiFileChooser")
 
     parser.add_argument('--no-crop', dest='crop', action='store_false', help="do not attempt to crop textures to just what is used")
     parser.add_argument('--no-tile', dest='tile', action='store_false', help="do not attempt to tile textures outside of UV space (must be cropping)")
