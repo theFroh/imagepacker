@@ -45,8 +45,8 @@ def guess_realpath(path):
 def main():
     parser = argparse.ArgumentParser(description="Naively pokes obj+mtls")
     parser.add_argument("obj", help="path to the .obj file")
-    parser.add_argument("-m", "--material", nargs=1, help="path to the .mtl file")
-    parser.add_argument("-o","--output", nargs=1, help="output name, used for image and folder")
+    parser.add_argument("-m", "--material", help="path to the .mtl file")
+    parser.add_argument("-o","--output", help="output name, used for image and folder")
     parser.add_argument("-a","--add", nargs="+", help="any additional images to pack")
 
     parser.add_argument('--no-crop', dest='crop', action='store_false', help="do not attempt to crop textures to just what is used")
